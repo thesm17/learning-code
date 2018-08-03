@@ -1,8 +1,6 @@
-/* .block {
-  display: grid;
-  grid-template-columns: 1fr 20% 1fr 40% 1fr;
-  grid-template-rows: 100px;
-} */
+.logo {
+  text-align: center;
+}
 
 .block {
   display: grid;
@@ -11,37 +9,34 @@
 
 .lefty {
   grid-column: 2;
-  background-color: purple;
+  border-radius: 5px;
   display: grid;
+  grid-template-columns: auto;
     grid-template-rows: 
-    [top-start]10px 
     [image-start]200px 
     [overlay-start]50px 
     [overlay-end]10px 
-    [image-end]10px 
-    [bottom-pad]10px;
+    [image-end]10px; 
     grid-column-gap: 2%;
-    border: dotted;
-    border-radius: 10px;
-
 }
 
 .photo {
+  background-size: cover;
   background-color: blueviolet;
-  grid-row: 2/6;
+  grid-row: 1/5;
   grid-column:1;
-  border: groove;
-  border-radius: 4px;;
+  border-radius: 5px;
 }
 
 .overlay {
   background-color: grey;
   opacity: .5;
-  grid-row: 3/5;
+  grid-row: 2/4;
   grid-column: 1;
 }
 
 .description {
   grid-column-start: 4;
   background-color: aquamarine;
+  border-radius: 5px;
 }

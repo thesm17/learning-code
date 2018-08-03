@@ -6,18 +6,20 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Awesome Website</title>
   <link rel="stylesheet" href="bigMoneyStyles.css" />
+  <script src="contentGrabber.js"></script>
+
 </head>
-<body>
+<body onload="process()">
   <div class="logo" >
     I'll put the logo here.
   </div>
-
- <div class="block">
-  <div class="lefty">
-    <div class="photo">Photo 1</div>
-    <div class="overlay"> Overlay 1</div>
+  <br/>
+  <div class="block" id="block1">
+  <div class="lefty" id="lefty1">
+    <div class="photo" id="photo1"></div>
+    <div class="overlay" id="overlay1"></div>
   </div>
-  <div class="description">Description 1</div>
+  <div class="description" id="description1"></div>
   </div>
 
 </body>
