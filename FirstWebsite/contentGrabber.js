@@ -5,7 +5,7 @@
 
 const blog1 = {
     photo:"<img src=\"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Mount_Everest_as_seen_from_Drukair2_PLW_edit.jpg/600px-Mount_Everest_as_seen_from_Drukair2_PLW_edit.jpg\">",
-    overlay:"Vising Mount Everest was amazing! I almost died!",
+    overlay:"Visiting Mount Everest was amazing! I almost died!",
     description: "What an adventure it was climbing the tallest mountain on the earth!"+
     "<br/><br/> First Christy and I rented some camels and then we started climbing. It was so insane." +
     "<br/><br/> Then we reached the top. Isn't the picture we took incredible? You can thank Cristy's Pixel for that."
