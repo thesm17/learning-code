@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Spread } from './spread/Spread';
-
+import { Content } from './content/Content';
 
 class App extends Component {
-
 
   render() {
     return (
@@ -12,7 +10,7 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Welcome to React</h1>
         </header>
-       <Spread />
+       <Content />
       </div>
     );
   }

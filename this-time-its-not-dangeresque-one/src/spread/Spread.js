@@ -1,42 +1,26 @@
 import React, { Component } from 'react';
 import {SpreadContainer} from './SpreadContainer';
-import PropTypes from 'prop-types';
-import Blog from '../blog/Blog';
+
+const desc ='', 
+      imgUrl= "https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg?auto=compress&cs=tinysrgb&h=350", 
+      formattedBlog= '';
 
 export class Spread extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      userInput: '',
-      imgUrl: Blog.imgUrl,
-      desc: Blog.desc,
-      formattedBlog: Blog.formattedBlog
+    this.state = {            
     }
-    this.handleUserInput = this.handleUserInput.bind(this);
   }
 
-  handleUserInput(e) {
-    this.setState({
-      userInput: e.target.value
-    });
-  }
 
   render(){
     return (
-    <div>
-      <h1>So far I've typed: {this.state.userInput}</h1>
-      <input type="text" onChange={this.handleUserInput} value={this.state.userInput} />
-      <SpreadContainer className="SpreadContainer"imgUrl={this.state.imgUrl} desc={this.state.desc} formattedBlog={this.state.formattedBlog} />
+    <div>      
+      <SpreadContainer className="SpreadContainer" 
+      imgUrl={this.props.imgUrl} 
+      desc={this.props.desc} 
+      formattedBlog={this.props.formattedBlog} />
     </div>
     );
   }
 }
-
-
-Spread.propTypes = {
-  imgUrl: PropTypes.string.isRequired,
-  desc: PropTypes.string.isRequired,
-  formattedBlog: PropTypes.object.isRequired //want to pass in a JSON object in the future, but for now will just write the file and then JSON-ify it
-};
-
-export default Spread;
