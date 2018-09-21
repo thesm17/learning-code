@@ -11,9 +11,9 @@ function getRandomColor() {
   return color;
 }
 
-const phoneOnly = '@media only screen and (max-width: 479px)',
-      mediumMedia = '@media only screen and (min-width: 480px)',
-      largeMedia = '@media only screen and (min-width: 800px)';
+const phoneOnly = '@media only screen and (max-width: 600px)',
+      mediumMedia = '@media only screen and (max-width: 880px)',
+      largeMedia = '@media only screen and (min-width: 801px)';
 
 const Container = glamorous.div({
   padding: '2px',
@@ -27,12 +27,10 @@ const Container = glamorous.div({
 });
 
 const Thumbnail = glamorous.div({
-  display: 'grid',  
-  justifyItems: 'stretch',
+
   minHeight:'200px',
   maxHeight: '300px',
   
-  justifyContent: 'center',
   backgroundColor: 'yellow',
   [phoneOnly]: {
     backgroundColor: 'pink',
@@ -48,7 +46,7 @@ const Thumbnail = glamorous.div({
 
 const Overlay = glamorous.div({
   //width: '10px',
-  position: 'relative',
+  position: 'relative', 
   bottom: '20%',
   backgroundColor: 'rgba(0,102,255,0.6)',
   borderRadius: '5px',
@@ -60,7 +58,6 @@ const Overlay = glamorous.div({
 const ThumbImg = glamorous.img({
   maxHeight: '300px',
   maxWidth: '100%',
-  overflow: 'hidden',
 })
 
 const Righty = glamorous.div({
@@ -90,7 +87,7 @@ export class SpreadContainer extends Component{
       <Container>
          <Thumbnail>
             <ThumbImg src={this.props.imgUrl}/>
-            <Overlay>{this.props.desc}</Overlay>
+            <Overlay>{this.props.desc} - {this.props.id}</Overlay>
         </Thumbnail>
         <Righty>{this.props.formattedBlog}</Righty>
       </Container>

@@ -1,12 +1,6 @@
 import React, { Component } from 'react';
-import {SpreadContainer} from './SpreadContainer';
 import glamorous from 'glamorous';
 import PropTypes from 'prop-types'
-
-// const desc ='', 
-//       imgUrl= "https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg?auto=compress&cs=tinysrgb&h=350", 
-//       formattedBlog= ''; 
-//pretty sure this isn't necessary for anything.
 
 const phoneOnly = '@media only screen and (max-width: 600px)',
       mediumMedia = '@media only screen and (max-width: 880px)',
@@ -52,7 +46,7 @@ export class SpreadContainer extends Component{
   render() {
     return (
       <Container>
-          <Thumbnail>
+         <Thumbnail>
             <ThumbImg src={this.props.imgUrl}/>
             <Overlay>{this.props.desc} - {this.props.id}</Overlay>
         </Thumbnail>
