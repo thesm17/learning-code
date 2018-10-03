@@ -5,7 +5,7 @@ class Main extends React.Component {
     super(props);
 
     this.state = {
-      imageURL: '',
+      fileURL: '',
     };
 
     this.handleUploadImage = this.handleUploadImage.bind(this);
@@ -23,7 +23,7 @@ class Main extends React.Component {
       body: data,
     }).then((response) => {
       response.json().then((body) => {
-        this.setState({ imageURL: `http://localhost:8000/${body.file}` });
+        this.setState({ fileURL: `http://localhost:8000/${body.file}` });
       });
     });
   }
@@ -41,7 +41,7 @@ class Main extends React.Component {
         <div>
           <button>Upload</button>
         </div>
-        <img src={this.state.imageURL} alt="img" />
+        <img src={this.state.fileURL} alt="file" />
       </form>
     );
   }
