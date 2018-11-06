@@ -41,6 +41,7 @@ class Main extends React.Component {
         <div>
           <button>Upload</button>
         </div>
+        <br />
         <img src={this.state.fileURL} alt="file" />
       </form>
     );

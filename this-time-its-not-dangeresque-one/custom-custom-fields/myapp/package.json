@@ -1,0 +1,17 @@
+{
+  "name": "Testino",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+  },
+  "author": "ltsSmitty",
+  "license": "ISC",
+  "description": "Woot! Here's an app that I'm trying to run on a server!",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.8.0"
+  }
+}
