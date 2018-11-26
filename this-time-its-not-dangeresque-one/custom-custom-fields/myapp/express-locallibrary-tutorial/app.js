@@ -7,16 +7,19 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var catalogRouter = require('./routes/catalog');
+var compression = require('compression');
 
 var app = express();
 
 //Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = 'mongodb://testy1:testy1@dbh70.mlab.com:27707/local_library';
+var mongoDB = process.env.MONGODB_URI || 'mongodb://testy1:testy1@dbh70.mlab.com:27707/local_library';
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+app.use(compression()); //Compress all routes
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

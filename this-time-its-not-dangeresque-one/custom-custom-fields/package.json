@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@types/node": "^10.12.2",
+    "@types/node": "^10.12.10",
     "ajv": "^6.5.5",
     "logfmt": "^1.2.1",
     "papaparse": "^4.6.1",
