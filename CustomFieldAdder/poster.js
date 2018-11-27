@@ -29,25 +29,13 @@ var field2 = {
   isAvailableInForms: "1"
 };
 
-var body = JSON.stringify({
+var workingBody = JSON.stringify({
   "method" : "createFields",
   "params": {
     "objects":[
       {
         relationship: "lead",
-        label: "fromJS3",
-        dataType: "text",
-        dataLength: "255",
-        isRequired: "0",
-        isCustom: "1",
-        isActive: "1",
-        isAvailableInContactManager: "1",
-        isEditableInContactManager: "1",
-        isAvailableInForms: "1"
-      },
-      {
-        relationship: "lead",
-        label: "field7",
+        label: "fromJS5",
         dataType: "text",
         dataLength: "255",
         isRequired: "0",
@@ -63,30 +51,41 @@ var body = JSON.stringify({
   }
 );
 
-var fieldsArray = [field1, field2];
 
-var postheaders = {
-  headers: {
-    'Content-Type': "application/json"
-    }
-}
-//console.log(fieldsArray[1]);
-
-// var testy = fieldsArray.forEach(key => {
-//   console.log(JSON.stringify(key));
-//   }
-// );
-
-request.post(`https://api.sharpspring.com/pubapi/v1/?accountID=${accountID}&secretKey=${secretKey}`,{
-  postheaders,
-  body
-},
+function postToShSpFirst( accountID, secretKey, body) {
+  request.post(`https://api.sharpspring.com/pubapi/v1/?accountID=${accountID}&secretKey=${secretKey}`,{
+    headers: {'Content-Type': "application/json"},
+    body
+  },
   function (error, response, body) {
   if (!error && response.statusCode == 200) {
     console.log(body);
-  }
+    }}
+  )
 }
-);
+
+
+function postToShSp( accountID, secretKey, body) {
+  trueBody =JSON.stringify({
+    "method" : "createFields",
+    "params": {
+      "objects":[body]
+    },
+    "id": "1005"
+    }
+  ); 
+  request.post(`https://api.sharpspring.com/pubapi/v1/?accountID=${accountID}&secretKey=${secretKey}`,{
+    headers: {'Content-Type': "application/json"},
+    trueBody
+  },
+  function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    console.log(body);
+    }}
+  )
+}
+
+postToShSpFirst(accountID, secretKey, workingBody);
 
 /* 
 uploadCsv(file f) {
