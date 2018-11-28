@@ -3,9 +3,9 @@ var accountID = "614DF4BF4FEE0CE729F3484D40A0BA10";
 var secretKey = "F21D9298D9DD0FCE331D5863D25F9B65";
 
 
-var field1 = {
+var field1 = ({
   relationship: "lead",
-  label: "field1",
+  label: "fromJS5",
   dataType: "text",
   dataLength: "255",
   isRequired: "0",
@@ -14,47 +14,25 @@ var field1 = {
   isAvailableInContactManager: "1",
   isEditableInContactManager: "1",
   isAvailableInForms: "1"
-};
+});
 
-var field2 = {
-  relationship: "lead",
-  label: "field3",
-  dataType: "text",
-  dataLength: "255",
-  isRequired: "0",
-  isCustom: "1",
-  isActive: "1",
-  isAvailableInContactManager: "1",
-  isEditableInContactManager: "1",
-  isAvailableInForms: "1"
-};
+function fieldToMethod (field) {
+  return  workingBody = JSON.stringify({
+    "method" : "createFields",
+    "params": {
+      "objects":[      
+          field
+      ]
+    },
+    "id": "1005"
+    }
+  ); 
+}
 
-var workingBody = JSON.stringify({
-  "method" : "createFields",
-  "params": {
-    "objects":[
-      {
-        relationship: "lead",
-        label: "fromJS5",
-        dataType: "text",
-        dataLength: "255",
-        isRequired: "0",
-        isCustom: "1",
-        isActive: "1",
-        isAvailableInContactManager: "1",
-        isEditableInContactManager: "1",
-        isAvailableInForms: "1"
-      }
-    ]
-  },
-  "id": "1005"
-  }
-);
-
-
-function postToShSpFirst( accountID, secretKey, body) {
+//this function is working great.
+function postToShSpFirst( accountID, secretKey, body) {  
   request.post(`https://api.sharpspring.com/pubapi/v1/?accountID=${accountID}&secretKey=${secretKey}`,{
-    headers: {'Content-Type': "application/json"},
+    headers: {'Content-Type': "application/json"},    
     body
   },
   function (error, response, body) {
@@ -64,28 +42,15 @@ function postToShSpFirst( accountID, secretKey, body) {
   )
 }
 
+var formattedField = fieldToMethod(field1);
+//this post works perfectly, passing the workingBody to ShSp and pushes
+postToShSpFirst(accountID, secretKey, formattedField);
 
-function postToShSp( accountID, secretKey, body) {
-  trueBody =JSON.stringify({
-    "method" : "createFields",
-    "params": {
-      "objects":[body]
-    },
-    "id": "1005"
-    }
-  ); 
-  request.post(`https://api.sharpspring.com/pubapi/v1/?accountID=${accountID}&secretKey=${secretKey}`,{
-    headers: {'Content-Type': "application/json"},
-    trueBody
-  },
-  function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body);
-    }}
-  )
-}
 
-postToShSpFirst(accountID, secretKey, workingBody);
+
+
+//testing this one right now
+//postToShSp(accountID, secretKey, workingBody);
 
 /* 
 uploadCsv(file f) {
