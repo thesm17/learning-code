@@ -1,7 +1,13 @@
+//This code will take a field array input, post them to ShSp, then return the state of the post.
+module.exports = {
+  postIt: postIt
+};
+
 var request = require('request');
 var accountID = "614DF4BF4FEE0CE729F3484D40A0BA10";
 var secretKey = "F21D9298D9DD0FCE331D5863D25F9B65";
 
+var accountID, secreyKey;
 
 var field1 = ({
   relationship: "lead",
@@ -16,41 +22,61 @@ var field1 = ({
   isAvailableInForms: "1"
 });
 
-function fieldToMethod (field) {
+var field2 = ({
+  relationship: "lead",
+  label: "fromJS5",
+  dataType: "text",
+  dataLength: "255",
+  isRequired: "0",
+  isCustom: "1",
+  isActive: "1",
+  isAvailableInContactManager: "1",
+  isEditableInContactManager: "1",
+  isAvailableInForms: "1"
+});
+
+var fields=[field1,field2];
+
+function fieldArrayToMethod (fieldArray) {
   return  workingBody = JSON.stringify({
     "method" : "createFields",
     "params": {
-      "objects":[      
-          field
-      ]
+      "objects":      
+          fieldArray
+      
     },
     "id": "1005"
     }
   ); 
 }
 
-//this function is working great.
-function postToShSpFirst( accountID, secretKey, body) {  
+function postToShSp( accountID, secretKey, body) {  
+  var returner = "";  
   request.post(`https://api.sharpspring.com/pubapi/v1/?accountID=${accountID}&secretKey=${secretKey}`,{
     headers: {'Content-Type': "application/json"},    
     body
   },
   function (error, response, body) {
-  if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode == 200) {
     console.log(body);
-    }}
+    returner = body;
+    }
+  }
   )
+  return returner;
 }
 
-var formattedField = fieldToMethod(field1);
-//this post works perfectly, passing the workingBody to ShSp and pushes
-postToShSpFirst(accountID, secretKey, formattedField);
+function postIt (accID, secKey, fieldArray) {
+  var formattedArray = fieldArrayToMethod(fieldArray);
+  return postToShSp(accID, secKey, formattedArray);
+}
 
 
 
 
-//testing this one right now
-//postToShSp(accountID, secretKey, workingBody);
+
+
+
 
 /* 
 uploadCsv(file f) {

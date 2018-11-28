@@ -1,8 +1,13 @@
+var poster = require('./poster');
+
+
 let attendeesArray = [];
 let currentWinner;
 let allWinners = [];
 let fileUploaded = false;
 let numberOfFields;
+
+console.log(((poster.postIt("614DF4BF4FEE0CE729F3484D40A0BA10","F21D9298D9DD0FCE331D5863D25F9B65",[{1:3}]))));
 
 function handleFiles(files) {
   // Check for the various File API support.
@@ -44,7 +49,6 @@ attendeesArray.map(cellValue => {
   console.log(`Cell ${cellValue}`);
 })
 }
-
 
 function errorHandler(evt) {
   if(evt.target.error.name == "NotReadableError") {
