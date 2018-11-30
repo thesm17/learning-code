@@ -4,12 +4,33 @@
     <script type="text/javascript" src="./node_modules/papaparse/papaparse.js"></script>
   </head>
   <body>
-        <input type="button" onclick="handleFiles()" Click this for an API!>
-        <input id="my-file-selector" type="file" onchange="handleFiles(this.files);" />
+        <input id="my-file-selector"  type="file" onchange="handleFiles(this.files);" />
         <br/>
-        <input id="choose-a-row" type="text" onsubmit="displayHeaders();" />  
          <br>
          <div id="my-row"></div> 
-
+<form>
+      <ul class="clean-list">
+        <li class="selected-field table-row">
+          <div class="title">ID</div>
+          <div class="pull-right select-wrap" id="12">Pull this right.
+            <input type="checkbox" class="csvCustom">Create Custom Field?
+            <select class="dataType" style="height:20px;width:210px;">
+              <option value="" disabled selected>Choose a field type</option>
+              <option value="picklist">Dropdown</option>
+              <option value="radio">Radio Button</option>
+              <option value="checkbox">Multi-Checkbox</option>
+              <option value="date">Date</option>
+              <option value="datetime">Date and Time</option>
+              <option value="text">Text</option>
+              <option value="textarea">Text Area</option>
+              <option value="url">URL</option>
+              <option value="boolean">Boolean</option>
+            
+            </select>
+            <input type="text" class="autocomplete" style="width:300px;" placeholder="New Custom Field Name: ID">
+          </div>
+        </li>
+      </ul>
+    </form>
       </body>
 </html>
