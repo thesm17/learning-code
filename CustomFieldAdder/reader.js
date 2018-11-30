@@ -1,53 +1,49 @@
-var poster = require('./poster');
-
-
-let attendeesArray = [];
-let currentWinner;
-let allWinners = [];
+//var poster = require('./poster');
 let fileUploaded = false;
-let numberOfFields;
+var fileContents;
+//var Papa = require('papaparse');
 
-console.log(((poster.postIt("614DF4BF4FEE0CE729F3484D40A0BA10","F21D9298D9DD0FCE331D5863D25F9B65",[{1:3}]))));
+//poster.postIt("614DF4BF4FEE0CE729F3484D40A0BA10","F21D9298D9DD0FCE331D5863D25F9B65",[{1:3}]);
 
-function handleFiles(files) {
-  // Check for the various File API support.
-  if (window.FileReader) {
-    // FileReader are supported.
-    getAsText(files[0]);
-    fileUploaded = true;
-  } else {
-    alert('FileReader are not supported in this browser.');
+const readUploadedFileAsText = (inputFile) => {
+  const temporaryFileReader = new FileReader();
+
+  return new Promise((resolve, reject) => {
+    temporaryFileReader.onerror = () => {
+      temporaryFileReader.abort;
+      reject(new DOMException("Problem parsing input file"));
+    };
+
+    temporaryFileReader.onload = () => {
+      csv = Papa.parse(temporaryFileReader.result);
+      resolve(csv);
+    };
+    temporaryFileReader.readAsText(inputFile);
+  })
+}
+
+const handleFiles = async (files) => {
+  const file = files[0];
+
+  try {
+    fileContents = await readUploadedFileAsText(file);
+    var headers="";
+    for (i = 0; i<fileContents.data[0].length; i++) {
+      headers+=fileContents.data[0][i]+"<br>";
+    }
+    displayElement(headers);
+    
+    //  fileContents.data.forEach(e => {displayElement(e)});
+    //displayRow(0);
+    
+    
+  } catch (e) {
+    console.warn(e.message);
   }
 }
 
-function getAsText(fileToRead) {
-  let reader = new FileReader();
-  // Read file into memory as UTF-8
-  reader.readAsText(fileToRead);
-  // Handle errors load
-  reader.onload = loadHandler;
-  reader.onerror = errorHandler;
-}
-
-function loadHandler(event) {
-  let csv = event.target.result;
-  processData(csv);
-}
-
-function processData(csv) {
-  let allTextLines = csv.split(/\r\n|\n/);
-  for (let i=0; i<allTextLines.length; i++) {
-      let data = allTextLines[i].split(',');
-          let tarr = [];
-          for (var j=0; j<data.length; j++) {
-              tarr.push(data[j]);
-          }
-          attendeesArray.push(tarr);
-  }
-arrayCreated = true;
-attendeesArray.map(cellValue => {
-  console.log(`Cell ${cellValue}`);
-})
+const displayElement = (e) => {
+document.getElementById("my-row").innerHTML += e;
 }
 
 function errorHandler(evt) {

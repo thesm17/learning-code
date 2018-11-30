@@ -1,9 +1,15 @@
 <html>
   <head>
     <script type="text/javascript" src="reader.js"></script>
+    <script type="text/javascript" src="./node_modules/papaparse/papaparse.js"></script>
   </head>
   <body>
         <input type="button" onclick="handleFiles()" Click this for an API!>
-        <input id="my-file-selector" type="file" onchange="handleFiles(this.files);">
-  </body>
+        <input id="my-file-selector" type="file" onchange="handleFiles(this.files);" />
+        <br/>
+        <input id="choose-a-row" type="text" onsubmit="displayHeaders();" />  
+         <br>
+         <div id="my-row"></div> 
+
+      </body>
 </html>
