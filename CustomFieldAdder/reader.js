@@ -1,7 +1,7 @@
 //var poster = require('./poster');
-let fileUploaded = false;
+var fileUploaded = false;
 var fileContents;
-var radioLimit = 5, picklistLimit = 12;
+const dontImportSize=3, radioLimit = 5, picklistLimit = 12;
 //var Papa = require('papaparse');
 
 //poster.postIt("614DF4BF4FEE0CE729F3484D40A0BA10","F21D9298D9DD0FCE331D5863D25F9B65",[{1:3}]);
@@ -25,25 +25,28 @@ const readUploadedFileAsText = (inputFile) => {
 
 const handleFiles = async (files) => {
   const file = files[0];
-  var suggestArray = [], suggestions = [];
+  var uniqueVals=[], typeArray = [], cleanVals = [], finalArray = [];
   try {
     fileContents = await readUploadedFileAsText(file);
-    rows = fileContents.data.length,  cols = fileContents.data[0].length,  vals = [];
+    rows = fileContents.data.length,  cols = fileContents.data[0].length;  //vals = [];
 
     //loop through all columns doing the following: count unique, determinine default, push that to array
     for (i=0; i<cols;i++){
-      //works. pushes the type of field into the last row of matrix; should be changed from push to insert
-      suggestArray.push(determineDefaultFieldType(countUniqueVals(i)[0]));
-      //works. suggestions[] is full of sets
-      suggestions.push(countUniqueVals(i)[1]);
-      //trying to figure out how to fill an array iff there are a small number in the set using picklistLimit
-      suggestions[1].forEach
-      //works
-      fileContents.data.push(suggestArray);
+      //uniqueVals stores the Set of unique values for one column in each cell
+      uniqueVals.push(countUniqueVals(i));
+      let fieldName =Array.from(uniqueVals[i])[0], fieldSize = uniqueVals[i].size-1 
+     
+      //typeArray stores recommended type in a column
+      typeArray.push(determineDefaultFieldType(uniqueVals[i])); 
+      
+      //   cleanVals has one column per row
+      //   with the first value being the recommended type: "text", "radio", "picklist", or "doNotImport"
+      //        the second value being the CSV column title: "Account ID", "email", "First Name", etc.
+      //        with all starting at 3 being the options. 
+      cleanVals.push(cleanData(typeArray[i],uniqueVals[i]));
     }
-      console.log(suggestions);
-    //for Debugging
-    console.log(`Rows: ${rows}, columns: ${cols}, Column 0: ${vals}`);
+
+    console.log(cleanVals);
 
     var headers="";
     for (i = 0; i<fileContents.data[i].length; i++) {
@@ -66,18 +69,34 @@ function errorHandler(evt) {
   }
 }
 
+//first returned argument is a #, second is an array
 const countUniqueVals = (i) => {
-  var suggestions = new Set(fileContents.data.map(function(value, index) {return value[i];}));
-  var uniqueVals = suggestions.size-1;
-  return [uniqueVals,suggestions];
+  numberUnique = new Set(fileContents.data.map(function(value, index) {return value[i];}))
+  if (numberUnique.has("")){numberUnique.delete("")};
+  return numberUnique 
   } 
 
+const determineDate = (possibleDateField) => {
+  if (Date.parse(possibleDateField) && possibleDateField.length>5){return true} else {return false};
+}
+
 const determineDefaultFieldType = (numUnique) => {
-  if (numUnique < 5) return 'radio';
-  else if (numUnique >4 && numUnique <12) return 'picklist';
-  else return 'text';
+  let size = numUnique.size-1;
+  let data = Array.from(numUnique);
+  if (determineDate(data[2])){return "date";}
+  else if (size<=dontImportSize) {return "doNotImport";}
+  else if (size <= radioLimit) {return 'radio';}
+  else if (size <=picklistLimit) {return 'picklist';}
+  else {return 'text';}
 };
 
-const pushSuggestedFieldType = (newRow) => {
-  return fileContents.data.push(newRow);
-};
+const cleanData = (type, valArray) => {
+  if (type == "text" || type == "doNotImport" || type == "date"){return [type, Array.from(valArray)[0]]} 
+  else {
+    let returner = [type]
+    Array.from(valArray).forEach(function(element){
+      returner.push(element);
+    })
+    return returner;
+  }
+}
