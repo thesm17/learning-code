@@ -54,7 +54,7 @@ let newField = {
   newField.label = row[1]}
   if (row[2]) {
     for (i=2; i<row.length-1;i++){
-      ops += `option: ${row[i]},`
+      ops:
     }
     
   }
