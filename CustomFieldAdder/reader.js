@@ -7,7 +7,7 @@ const dontImportSize=3, radioLimit = 5, picklistLimit=12;
 //poster.postIt("614DF4BF4FEE0CE729F3484D40A0BA10","F21D9298D9DD0FCE331D5863D25F9B65",[{1:3}]);
 
 // module.exports = {
-//   handleFiles: handleFiles
+//   parseData: parseData
 // }
 
 
@@ -28,27 +28,12 @@ const readUploadedFileAsText = (inputFile) => {
   });
 };
 
-const handleFiles = async (files, opts) => {
+async function parseData(file, opts) {
+  //checks for overloaded function: if one extra arg, it's picklistLimit, if two it's radio then picklist
   if (opts) {
-  if (opts.length===1){picklistLimit=opts[0]}
-  if (opts.length===2){radioLimit=opts[0]; picklistLimit=opts[1];}
+    if (opts.length===1){picklistLimit=opts[0]}
+    if (opts.length===2){radioLimit=opts[0]; picklistLimit=opts[1];}
   }
-    const file = files[0];
-    return new Promise((resolve, reject) => {
-      try {resolve(parseData(file));
-      } catch (e){ 
-        console.warn(e.message);
-        reject ( new DOMException(e));
-      }}
-    )
-  }
-
-
-
-
-
-
-async function parseData(file) {
     var uniqueVals=[], typeArray = [], cleanVals = [];
     fileContents = await readUploadedFileAsText(file);
     rows = fileContents.data.length,  cols = fileContents.data[0].length;

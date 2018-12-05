@@ -6,20 +6,34 @@ module.exports = {
 var request = require('request');
 var accountID = "614DF4BF4FEE0CE729F3484D40A0BA10";
 var secretKey = "F21D9298D9DD0FCE331D5863D25F9B65";
+var pushID = Math.floor(Math.random()*100000);
 
 var accountID, secreyKey;
 
 var field1 = ({
   relationship: "lead",
-  label: "fromJS5",
-  dataType: "text",
+  label: "third test picklist",
+  systemName: "second test picklist",
+  dataType: "picklist",
   dataLength: "255",
   isRequired: "0",
   isCustom: "1",
   isActive: "1",
   isAvailableInContactManager: "1",
   isEditableInContactManager: "1",
-  isAvailableInForms: "1"
+  isAvailableInForms: "1",
+  // options: [
+  //   {
+  //     label: "first option",
+  //     value: "first option",
+  //     displayOrder: "0"
+  //   },
+  //   {
+  //     label: "second option",
+  //     value: "second option",
+  //     displayOrder: "1"
+  //   }
+  // ]
 });
 
 var field2 = ({
@@ -41,11 +55,9 @@ function fieldArrayToMethod (fieldArray) {
   return  workingBody = JSON.stringify({
     "method" : "createFields",
     "params": {
-      "objects":      
-          fieldArray
-      
+      "objects": [fieldArray]      
     },
-    "id": "1005"
+    "id": `${pushID}`
     }
   ); 
 }
@@ -62,16 +74,17 @@ function postToShSp( accountID, secretKey, body) {
     returner = body;
     }
   }
-  :)
+  )
   return returner;
 }
 
 function postIt (accID, secKey, fieldArray) {
   var formattedArray = fieldArrayToMethod(fieldArray);
+  console.log(formattedArray);
   return postToShSp(accID, secKey, formattedArray);
 }
 
-
+postIt(accountID,secretKey, field1);
 
 
 
