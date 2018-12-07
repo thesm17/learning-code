@@ -72,51 +72,47 @@ function getNewToken(oAuth2Client, callback) {
  * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-function getContacts(auth, callback) {
+function getContacts(auth,) {
   const sheets = google.sheets({version: 'v4', auth});
   sheets.spreadsheets.values.get({
     spreadsheetId: '16LGZ18ocdm5WdaOWgfm1nDDum9naFnBmj-kgjq__F50',
     range: 'Form Responses 2!A1200:M',
-  }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
-    const rows = res.data.values;
-    if (rows.length) {
-      // Grab email addresses out of the primary field
-      var email, company, welcomeCallTime,  users = {
-        primaryUser: {
-          email,
-          company,
-          welcomeCallTime
-        },
+  }, parseSheet);
+}
 
+function parseSheet(err, res) {
+  if (err) return console.log('The API returned an error: ' + err);
+  const rows = res.data.values;
+  if (rows.length) {
+    // Grab email addresses out of the primary field
+    var email, company, welcomeCallTime, meetingID, primaryUser, secondaryUser, 
+      users = {
+        company,
+        welcomeCallTime,
+        meetingID,
+        primaryUser: {
+          email
+        },
         secondaryUser: {
-          email,
-          company,
-          welcomeCallTime
+          email
         }
       };
-      //attach primary contact info to Users.user
-      rows.forEach((row) => {
-        users.primaryUser[row] = {
-          email: row[11].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi),
-          company: row[3],
-          welcomeCallTime: row[0]
-        };
-        if(row[12]) {
-        users.secondaryUser[row] = {
-          email: row[12].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi),
-          company: row[3],
-          welcomeCallTime: row[0]
-        }}
-      })
-      
-      //Print the user objects
-      rows.map((row) => {
-        console.log(`Primary: ${JSON.stringify(users.primaryUser[row])}`);
-        console.log(`Secondary: ${JSON.stringify(users.secondaryUser[row])}`);
-      });
-    } else {
-      console.log('No data found.');
-    }
-  });
+    //attach info into users
+    rows.forEach((row) => {
+      users[row] = {
+        company : row[3],
+        welcomeCallTime : row[0],
+      };
+      users[row].primaryUser = {email: row[11].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)}
+      if (row[12]) {
+      users[row].secondaryUser = {email: row[12].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)}
+        }
+    })
+    for (user in users){
+      console.log(JSON.stringify(users[user]));
+    };
+  } else {
+    console.log('No data found.');
+  }
 }
+
