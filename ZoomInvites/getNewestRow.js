@@ -13,7 +13,8 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('./credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Sheets API.
-  authorize(JSON.parse(content), listMajors);
+  authorize(JSON.parse(content), getContacts);
+  
 });
 
 /**
@@ -71,7 +72,7 @@ function getNewToken(oAuth2Client, callback) {
  * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-function listMajors(auth) {
+function getContacts(auth, callback) {
   const sheets = google.sheets({version: 'v4', auth});
   sheets.spreadsheets.values.get({
     spreadsheetId: '16LGZ18ocdm5WdaOWgfm1nDDum9naFnBmj-kgjq__F50',
@@ -79,20 +80,40 @@ function listMajors(auth) {
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const rows = res.data.values;
-    
     if (rows.length) {
       // Grab email addresses out of the primary field
-      var emails = [];
+      var email, company, welcomeCallTime,  users = {
+        primaryUser: {
+          email,
+          company,
+          welcomeCallTime
+        },
+
+        secondaryUser: {
+          email,
+          company,
+          welcomeCallTime
+        }
+      };
+      //attach primary contact info to Users.user
       rows.forEach((row) => {
-        console.log(row[11].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi));
-        emails.push(row[11].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi));
+        users.primaryUser[row] = {
+          email: row[11].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi),
+          company: row[3],
+          welcomeCallTime: row[0]
+        };
+        if(row[12]) {
+        users.secondaryUser[row] = {
+          email: row[12].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi),
+          company: row[3],
+          welcomeCallTime: row[0]
+        }}
       })
       
-
-      console.log('Contact Email , Company Name:');
-      // Print columns A and E, which correspond to indices 0 and 4.
+      //Print the user objects
       rows.map((row) => {
-       // console.log(`${emails[row]}, ${row[3]}`);
+        console.log(`Primary: ${JSON.stringify(users.primaryUser[row])}`);
+        console.log(`Secondary: ${JSON.stringify(users.secondaryUser[row])}`);
       });
     } else {
       console.log('No data found.');
