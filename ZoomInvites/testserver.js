@@ -16,19 +16,21 @@ app.post('/webhooks/orders/create', (req, res) => {
 
 app.post('/newRow', function (req, res) {
   const body = req.body;
-  //console.log(body);
+  console.log(body);
   //res.set('Content-Type', 'text/plain')
   //res.sendStatus(200);
   //res.send("data worked.");
   res.send(`You sent ${JSON.stringify(body)} to Express`);
   console.log('🎉 New row in sheet!')
+  parseRowFromWebhook(body);
   //console.log(res);
-},parseRowFromWebhook())
+},)
 
 app.get('/newRow', (req, res) => {
   console.log('Someone tried loading the zapier page');
 })
 
+//this is fake!
 function parseRowFromWebhook(body) {
   console.log(JSON.stringify(body));
 }

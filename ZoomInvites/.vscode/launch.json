@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/getNewestRow.js"
+      "program": "${workspaceFolder}/get.js"
     }
   ]
 }
