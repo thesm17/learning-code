@@ -1,25 +1,24 @@
 var request = require('request');
 
-const demoTimeField = "group_demo_date_time_selected_5bec9213aaa16";
-const demoTypeField ="group_appointment_type_5bd8966a8d9dd";
-const agencyDemo = "Live group demo for your Agency";
-const endUserDemo = "Live group demo for your Business";
-var clientData;
+var demoTimeField = "group_demo_date_time_selected_5bec9213aaa16",
+ demoTypeField ="group_appointment_type_5bd8966a8d9dd",
+ agencyDemo = "Live group demo for your Agency",
+ endUserDemo = "Live group demo for your Business",
+ clientData;
 
 var 
-  agencyToken,
-  agencyEmail="agencydemos@sharpspring.com", 
-  endUserToken, 
-  endUserEmail="businessdemos@sharpspring.com";
+  token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJPVWJlZERLYVRzbXpHanB3Mi1VODN3IiwiZXhwIjoiMTY0MDExNzU4NiJ9.N3cOn9z4-mSTFrpYDTMaBBymkbQ95DZuktr3HsX3OEk",
+  agencyEmail = "agencydemos@sharpspring.com", 
+  endUserEmail = "businessdemos@sharpspring.com";
 
  var jsonTestBody = {
    body: {
     firstName: "Smitty",
     lastName: "Penman",
-    email: `smitty.penman+${Math.floor(Math.random(1000))}@sharpspring.com`,
-    company: "SharpSpring",
-    group_demo_date_time_selected_5bec9213aaa16: "12/27/2018",
-    group_appointment_type_5bd8966a8d9dd : "Live group demo for your Business"
+    email: `smitty.penman+99@sharpspring.com`,
+    companyName: "SharpSpring",
+    group_demo_date_time_selected_5bec9213aaa16: "2018-12-20 16:00:00",
+    group_appointment_type_5bd8966a8d9dd : "Live group demo for your Agency"
    }
  }
 
@@ -31,35 +30,37 @@ const processData = (req, res) =>  {
   var input = req.body;
   var status = new Promise((res, rej) => {
     clientData = parseWebhookFromDemoForm(input);
-    //If agency then
-    if (clientData.clientType==="agency") {
-      var getRecentWebinars = new Promise((resolve,reject) => {
-        request.get(`https://api.zoom.us/v2/users/${agencyEmail}/webinars?page_size=30&page_number=1`, 
+    //console.log(clientData);
+    console.log(clientData.clientType);
+    if (clientData.clientType=="agency") {
+      var getRecentMeetings = new Promise((resolve,reject) => {
+        request.get(`https://api.zoom.us/v2/users/${agencyEmail}/meetings`, 
         {
-          headers: { 'Authorization': 'Bearer '+agencyToken}
+          headers: { 'Authorization': 'Bearer '+token}
         },
           function(error, response, body){
             if (!error && response.statusCode == 200) {
-              webinars=JSON.parse(body);
-              resolve(webinars);
+              console.log(JSON.parse(body))
+              Meetings=JSON.parse(body);
+              resolve(Meetings);
             } else {      
               reject(new Error("Problem connecting to API"));
             }
           }
         )
-      })
+      }).catch("Error connecting to Zoom API.")
     };
     //if End user then
-    if (clientData.clientType==="end user") {
-      var getRecentWebinars = new Promise((resolve,reject) => {
-        request.get(`https://api.zoom.us/v2/users/${endUserEmail}/webinars?page_size=30&page_number=1`, 
+    if (clientData.clientType=="end user") {
+      var getRecentMeetings = new Promise((resolve,reject) => {
+        request.get(`https://api.zoom.us/v2/users/${endUserEmail}/meetings`, 
         {
-          headers: { 'Authorization': 'Bearer '+endUserToken}
+          headers: { 'Authorization': 'Bearer '+token}
         },
           function(error, response, body){
             if (!error && response.statusCode == 200) {
-              webinars=JSON.parse(body);
-              resolve(webinars);
+              meetings=JSON.parse(body);
+              resolve(meetings);
             } else {      
               reject(("Problem connecting to API."));
             }
@@ -67,9 +68,9 @@ const processData = (req, res) =>  {
         )
       })
     };
-    getRecentWebinars.then(function (value) {
+    getRecentMeetings.then(function (value) {
       try{
-        matchCorrectWebinar(clientData,value);
+        matchCorrectmeeting(clientData,value);
         registerContact(clientData).
           then(function(values) {
             res(values);
@@ -78,19 +79,20 @@ const processData = (req, res) =>  {
     })
   });
 
-  status.then(function(values){
-    let message = req.query.message || req.body.message || 
+  status.then(function zoomResponse(values){
+   // let message = req.query.message || req.body.message || 
       `Response from Zoom:\n
       ${JSON.stringify(clientData)}\n
       ${values}`;
-    res.status(200).send(message);  
+    //res.status(200).send(message);  
+    return values;
   })
 }
 
 function parseWebhookFromDemoForm(body) {
   /*
   body will be JSON object with field names from ShSp post back of lead data.
-  Important keys are: emailAddress, firstName, lastName, organization name, and webinar time. 
+  Important keys are: emailAddress, firstName, lastName, organization name, and meeting time. 
   */ 
 
   var email, company, meetingID, user, clientType;
@@ -99,7 +101,7 @@ function parseWebhookFromDemoForm(body) {
     company: body.companyName,
     firstName: body.firstName,
     lastName: body.lastName,
-    email: body.emailAddress,
+    email: body.email,
     clientType,
     meetingID,
     requestedDay: body.group_demo_date_time_selected_5bec9213aaa16
@@ -115,44 +117,45 @@ function parseWebhookFromDemoForm(body) {
   return user;
    };
 
-const matchCorrectWebinar = (clientData, webinarList) => {
+const matchCorrectmeeting = (clientData, meetingList) => {
+
   let requestedDay = new Date(clientData.requestedDay);
 
   function sameDay(d1, d2) {
-    if (d1.getFullYear() === d2.getFullYear() &&
+    console.log(d1+" and Zoom: "+d2)
+    return (d1.getFullYear() === d2.getFullYear() &&
       d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate());
-  }
+      d1.getDate() === d2.getDate() &&
+      d1.getHours() === d2.getHours());
+    }
 
-  var correctWebinar = webinarList.webinars.filter((webinar) => {
-    let webinarDay = new Date(webinar.start_time);
-    console.log(sameDay(requestedDay,webinarDay));
-    return (sameDay(requestedDay,webinarDay));
+  var correctmeeting = meetingList.meetings.filter((meeting) => {
+    let meetingDay = new Date(meeting.start_time);
+    return (sameDay(requestedDay,meetingDay));
     });
 
-  if (typeof correctWebinar[0]==="undefined"){
-    console.error("There is no webinar that day.");
-    return new Error("No scheduled webinars next week")
+  if (typeof correctmeeting[0]==="undefined"){
+    console.error("There is no meeting that day.");
+    return new Error("No scheduled Meetings next week")
   };
 
-  clientData.meetingID=correctWebinar[0].id;
-  console.log("Zoom webinar ID: "+ clientData.meetingID);
+  clientData.meetingID=correctmeeting[0].id;
+  console.log("Zoom meeting ID: "+ clientData.meetingID);
   return clientData.meetingID;
   
   }
 
 function registerContact(clientData) {
-  var body = ({
+
+  var jsonBody = JSON.stringify({
     email: clientData.email,
     first_name: clientData.firstName ,
     last_name: clientData.lastName,
     org: clientData.company,
   });
 
-  var jsonBody = JSON.stringify(body);
-
   return new Promise((resolve,reject) => {
-    request.post(`https://api.zoom.us/v2/webinars/${clientData.meetingID}/registrants`, 
+    request.post(`https://api.zoom.us/v2/meetings/${clientData.meetingID}/registrants`, 
       {
         headers: { 
           'Authorization': 'Bearer '+token,
