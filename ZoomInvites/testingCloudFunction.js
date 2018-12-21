@@ -1,46 +1,16 @@
 var request = require('request');
 var clientData;
-
-var payload= {
-"id":"1249",
-"row":"1249",
-"COL$T":"Grant Dohrman",
-"COL$S":"N/A",
-"COL$R":"chelsea.knisely@sharpspring.com",
-"COL$Q":"Cassandra Garcia",
-"COL$P":"No",
-"COL$O":"Complete",
-"COL$N":"Complete",
-"COL$M":"smitty.penman+"+Math.floor(Math.random()*1000)+"@sharpspring.com - Jason",
-"COL$L":"smitty.penman+"+Math.floor(Math.random()*1000)+"@sharpspring.com - Jason",
-"COL$K":"May have to be on top of his app knowledge.",
-"COL$J":"60",
-"COL$I":"N/A",
-"COL$H":"N/A",
-"COL$G":"Have consulting from Growthwright for hand off. ",
-"COL$F":"\"Unusual situation\" ClarisHealth has been around for about 5 years, introduce to SharpSpring through an agency (Growthwright) purchased a license through them. Growthwright is changing their marketing departmentand are leaving SharpSpring. ClarisHealth, chose to move forward with SharpSpring. \nHave been using SharpSpring for \"several months\" primarily with the CRM. Utilizing the product \"87% utilization score.\"",
-"COL$E":"308463047",
-"COL$D":"ClarisHealth",
-"COL$C":"ctucker@clarishealth.com",
-"COL$B":"12/12/2018",
-"COL$A":"12/10/2018 16:52:04",
-"_content_hash":"a963b9b20eee6700938bce5f3b642d70",
-};
 var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJPVWJlZERLYVRzbXpHanB3Mi1VODN3IiwiZXhwIjoiMTU0NjI4OTYxOCJ9.HyygVT5QIM1dp4TcmLGiCnnNXSS3STVu17P95uILud0';
 
-/**** *
-* For testing. 
-* @param Payload was a real line at some point.
-*/
+/**
+ * Responds to any HTTP request.
+ *
+ * @param {!express:Request} req HTTP request context.
+ * @param {!express:Response} res HTTP response context.
+ */
 
-//processData(payload);
-
-
-/****
-// @param input is the zapier webhook data, already run through body-parser. 
-//
-*/
-function processData(input)   {
+exports.processData = (req, res) =>  {
+  var input = req.body;
   var status = new Promise((res, rej) => {
     clientData = parseWebhookFromWelcomeCallForm(input);
     var getRecentWebinars = new Promise((resolve,reject) => {
@@ -60,25 +30,27 @@ function processData(input)   {
     getRecentWebinars.then(function (value) {
       try{
         matchCorrectWebinar(clientData,value);
-          Promise.all([registerPrimaryContact(clientData),registerSecondaryContacts(clientData)]).
+        Promise.all([registerPrimaryContact(clientData),registerSecondaryContacts(clientData)]).
           then(function(values) {
             res(values);
-          }); 
-        
-    }catch(error) {console.error(error); rej(error)}
-  })});
+          });} 
+      catch(error) {console.error(error); rej(error)}
+    })
+  });
+
   status.then(function(values){
-    console.log(
+    let message = req.query.message || req.body.message || 
       `Here is what Zapier will get when it's all finished:\n
       ${JSON.stringify(clientData)}\n
-      ${values}`);
+      ${values}`;
+    res.status(200).send(message);  
   })
 }
 
 function parseWebhookFromWelcomeCallForm(body) {
   //Check to make sure there are a date, an email address, and a company name
   //Col D is company, B is welcome call date, primary email is L, secondary is M
-   if (!(body.COL$L && body.COL$D &&body.COL$B)){return error("Missing necessary information") }
+   if (!(body.COL$L && body.COL$D &&body.COL$B)){return new Error("Missing necessary information") }
  
   var email, company, welcomeCallDay, meetingID, primaryUser, secondaryUser, user;
       
