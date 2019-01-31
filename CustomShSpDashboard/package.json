@@ -1,0 +1,28 @@
+{
+  "name": "customshspdashboard",
+  "version": "1.0.0",
+  "description": "Dashboard in React to show multiple site at the same time",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesm17/CustomShSPDashboard.git"
+  },
+  "keywords": [
+    "React",
+    "dashboard",
+    "sharpspring"
+  ],
+  "author": "Smitty Penman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thesm17/CustomShSPDashboard/issues"
+  },
+  "homepage": "https://github.com/thesm17/CustomShSPDashboard#readme",
+  "dependencies": {
+    "request-promise": "^4.2.2",
+    "sass": "^1.16.1"
+  }
+}
