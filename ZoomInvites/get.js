@@ -1,133 +1,119 @@
-var request = require('request');
-var clientData;
+var request = require('request-promise');
+require('dotenv').config();
 
-var payload= {
-"id":"1249",
-"row":"1249",
-"COL$T":"Grant Dohrman",
-"COL$S":"N/A",
-"COL$R":"chelsea.knisely@sharpspring.com",
-"COL$Q":"Cassandra Garcia",
-"COL$P":"No",
-"COL$O":"Complete",
-"COL$N":"Complete",
-"COL$M":"smitty.penman+"+Math.floor(Math.random()*1000)+"@sharpspring.com - Jason",
-"COL$L":"smitty.penman+"+Math.floor(Math.random()*1000)+"@sharpspring.com - Jason",
-"COL$K":"May have to be on top of his app knowledge.",
-"COL$J":"60",
-"COL$I":"N/A",
-"COL$H":"N/A",
-"COL$G":"Have consulting from Growthwright for hand off. ",
-"COL$F":"\"Unusual situation\" ClarisHealth has been around for about 5 years, introduce to SharpSpring through an agency (Growthwright) purchased a license through them. Growthwright is changing their marketing departmentand are leaving SharpSpring. ClarisHealth, chose to move forward with SharpSpring. \nHave been using SharpSpring for \"several months\" primarily with the CRM. Utilizing the product \"87% utilization score.\"",
-"COL$E":"308463047",
-"COL$D":"ClarisHealth",
-"COL$C":"ctucker@clarishealth.com",
-"COL$B":"12/12/2018",
-"COL$A":"12/10/2018 16:52:04",
-"_content_hash":"a963b9b20eee6700938bce5f3b642d70",
+// [START] Configure Zoom api Token
+const jwt = require('jsonwebtoken');
+
+const payload = {
+    iss: `${process.env.ZoomAccID}`,
+    exp: ((new Date()).getTime() + 5000)
 };
-var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJPVWJlZERLYVRzbXpHanB3Mi1VODN3IiwiZXhwIjoiMTU0NjI4OTYxOCJ9.HyygVT5QIM1dp4TcmLGiCnnNXSS3STVu17P95uILud0';
+const token = "Bearer " + jwt.sign(payload, `${process.env.ZoomSecKey}`);
+// [END] Configure Zoom api Token
 
-/**** *
-* For testing. 
-* @param Payload was a real line at some point.
-*/
-
-//processData(payload);
-
-
-/****
-// @param input is the zapier webhook data, already run through body-parser. 
-//
-*/
-function processData(input)   {
-  var status = new Promise((res, rej) => {
-    clientData = parseWebhookFromWelcomeCallForm(input);
-    var getRecentWebinars = new Promise((resolve,reject) => {
-      request.get('https://api.zoom.us/v2/users/qr3FSl74TEuOzC4jqlo36g/webinars?page_size=30&page_number=1', 
-      {
-        headers: { 'Authorization': 'Bearer '+token}
-      },
-        function(error, response, body){
-          if (!error && response.statusCode == 200) {
-            webinars=JSON.parse(body);
-            resolve(webinars);
-          } else {      
-            reject(new DOMException("problem connecting to API"));
-          }
-        }
-      )});
-    getRecentWebinars.then(function (value) {
-      try{
-        matchCorrectWebinar(clientData,value);
-          Promise.all([registerPrimaryContact(clientData),registerSecondaryContacts(clientData)]).
-          then(function(values) {
-            res(values);
-          }); 
-        
-    }catch(error) {console.error(error); rej(error)}
-  })});
-  status.then(function(values){
-    console.log(
-      `Here is what Zapier will get when it's all finished:\n
-      ${JSON.stringify(clientData)}\n
-      ${values}`);
-  })
+var testData = {
+"COL$L":"smitty.penman+"+Math.floor(Math.random()*1000)+"@sharpspring.com - Jason",
+"COL$B": (new Date()),
+"COL$D":"ClarisHealth",
+"COL$M":"smitty.penman+"+Math.floor(Math.random()*1000)+"@sharpspring.com - Jason",
 }
 
-function parseWebhookFromWelcomeCallForm(body) {
-  //Check to make sure there are a date, an email address, and a company name
-  //Col D is company, B is welcome call date, primary email is L, secondary is M
-   if (!(body.COL$L && body.COL$D &&body.COL$B)){return error("Missing necessary information") }
- 
-  var email, company, welcomeCallDay, meetingID, primaryUser, secondaryUser, user;
-      
-   user = {
-     company : body.COL$D,
-     welcomeCallDay : body.COL$B,
-     meetingID,
-   };
-   user.primaryUser = {email: body.COL$L.match(/([a-zA-Z0-9._+-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)}
-   if (body.COL$M) {
-   user.secondaryUser = {email: body.COL$M.match(/([a-zA-Z0-9._+-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)}
-     }
-   return user;
-   };
 
-const matchCorrectWebinar = (clientData, webinarList) => {
-  let today = new Date(clientData.welcomeCallDay);
-    const daysBetween = ( date1, date2 ) => {
-      //Get 1 day in milliseconds
-      var one_day=1000*60*60*24;
-    
-      // Convert both dates to milliseconds
-      var date1_ms = new Date(date1).getTime();
-      var date2_ms = new Date(date2).getTime();
-    
-      // Calculate the difference in milliseconds
-      var difference_ms = date2_ms - date1_ms;
-        
-      // Convert back to days and return
-      return Math.round(difference_ms/one_day); 
-    }
+const registerContacts = async(companyInfo) => {
+  try{
+    response = await Promise.all([
+      await registerPrimaryContact(companyInfo),
+      await registerSecondaryContacts(companyInfo)]);
+    return response;
+  } catch (e) {console.log(e); throw new Error(e)}
 
-  var correctWebinar = webinarList.webinars.filter((webinar) => {
-    let webinarDay = new Date(webinar.start_time);
-    //Uncomment to see how many days between welcome call and all webinars
-    //console.log(daysBetween(today,webinarDay));
-    return (JSON.parse(daysBetween(today,webinarDay)>5 && daysBetween(today,webinarDay)<13)&& webinar.topic.match("Essential"));
-    });
-  if (typeof correctWebinar[0]==="undefined"){
-    console.error("Undefined meeting aka no webinar next week.");
-    return new Error("No scheduled webinars next week")
-  };
-  clientData.meetingID=correctWebinar[0].id;
-  console.log("Zoom webinar ID: "+ clientData.meetingID);
-  return clientData.meetingID;
-  
+}
+
+
+const getRecentWebinars = async() => {
+  var options = { 
+    method: 'GET',
+    url: `https://api.zoom.us/v2/users/qr3FSl74TEuOzC4jqlo36g/webinars?page_size=3000&page_number=1`,
+    headers: 
+    {'cache-control': 'no-cache',
+      Authorization: token,
+      'Content-Type': 'application/json' } };
+  try {
+    var webinars = await (request(options));
+    return webinars;
+  } catch (err) {
+    console.log(err); 
+    throw new Error(err)}
+  ////////
   }
 
-function registerPrimaryContact(clientData) {
+const parseWebhookFromWelcomeCallForm = (body) => {
+  //Check to make sure there are a date, an email address, and a company name
+  //Col D is company, B is welcome call date, primary email is L, secondary is M
+   if (!(body.COL$L && body.COL$D &&body.COL$B)){
+     throw new Error("Missing necessary information from Google Sheet. ") }
+ 
+  var user = {
+    company : body.COL$D,
+    welcomeCallDay : body.COL$B,
+    meetingID: "",
+    primaryUser: {
+      email: ""
+    },
+    secondaryUser: {
+      email: ""
+  }};
+
+  user.primaryUser.email = body.COL$L.match(/([a-zA-Z0-9._+-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)
+  
+  if (body.COL$M) {
+    user.secondaryUser.email = body.COL$M.match(/([a-zA-Z0-9._+-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)};
+  
+  // If invalid email
+    if (!user.primaryUser.email) {
+      throw new Error("Primary email address is invalid. Parsed value from welcome form of '"+ user.primaryUser.email+ 
+         "' is undefined. It is most likely Column L from the spreadsheet did not have a proper email address.");
+    } else return user;
+
+  }   
+
+const daysBetween = ( date1, date2 ) => {
+  //Get 1 day in milliseconds
+  var one_day=1000*60*60*24;
+
+  // Convert both dates to milliseconds
+  var date1_ms = new Date(date1).getTime();
+  var date2_ms = new Date(date2).getTime();
+
+  // Calculate the difference in milliseconds
+  var difference_ms = date2_ms - date1_ms;
+    
+  // Convert back to days and return
+  return Math.round(difference_ms/one_day); 
+}
+
+const matchCorrectWebinar = async (companyInfo, webinarList) => {
+  let webinars = JSON.parse(webinarList).webinars;
+  let today = new Date(companyInfo.welcomeCallDay); 
+  try {
+    var correctWebinar = webinars.filter((webinar) => {
+      let webinarDay = new Date(webinar.start_time);
+      return (JSON.parse(daysBetween(today,webinarDay)>5 && daysBetween(today,webinarDay)<13)&& webinar.topic.match("Essential"));
+      })
+    if (correctWebinar.length>1){
+      console.log("Warning: there are two Essential webinars on that date. This person will be auto-registered for the first available time.");
+      correctWebinar.map((e)=>{console.log(JSON.stringify("Start time: "+e.start_time+", webinar id: "+e.id));})
+    }  
+    ;
+    console.log("Proper Zoom webinar ID: "+ correctWebinar[0].id);
+    return correctWebinar[0].id;
+
+    } catch (err) {
+      throw new Error("Uh oh. There aren't any webinars titled 'Essential' with a final meeting day 6 to 12 days from input date, "+webinarDay)
+    }  
+  }
+
+const registerPrimaryContact = async (clientData) => {
   var body = ({
     email: clientData.primaryUser.email[0],
     first_name: clientData.primaryUser.email[0],
@@ -136,57 +122,92 @@ function registerPrimaryContact(clientData) {
   });
 
   var jsonBody = JSON.stringify(body);
-
-  return new Promise((resolve,reject) => {
-    request.post(`https://api.zoom.us/v2/webinars/${clientData.meetingID}/registrants`, 
-      {
-        headers: { 
-          'Authorization': 'Bearer '+token,
-          'Content-Type': 'application/json'
-        },
-        body: jsonBody
-      },
-      function(error, response, body){
-        if (error) {reject(console.log("Issue posting to zoom: "+error));}
-        console.log("Body from zoom:\n "+body+"\n");
-        resolve(body); 
-        }
-      )
-    });
+    var options = {
+      method: 'POST',
+      url: `https://api.zoom.us/v2/webinars/${clientData.meetingID}/registrants`,
+      headers:{
+        'cache-control': 'no-cache',
+        Authorization: token,
+        'Content-Type': 'application/json' },
+      body: jsonBody };
+    try {
+      var zoomResponse = await request(options);
+      return zoomResponse;
+    } catch (err) {
+      console.log(err)
+      throw new Error("Error posting new registrant to Zoom: " + err);}
 
 }
 
-function registerSecondaryContacts (clientData) {
-  if (clientData.secondaryUser) {
-    //console.log(JSON.stringify(clientData.secondaryUser.email));
-    clientData.secondaryUser.email.forEach((user,index) => {
+const registerSecondaryContacts = async (clientData) => {
+  if (clientData.secondaryUser.email) {
+    clientData.secondaryUser.email.forEach( async(user,index) => {
       var body = ({
-        email: clientData.secondaryUser.email[index],
-        first_name: clientData.secondaryUser.email[index],
-        last_name: clientData.company,
-        org: clientData.company
-      });
-
-      var jsonBody = JSON.stringify(body);
-
-      return new Promise((resolve,reject) => {
-        request.post(`https://api.zoom.us/v2/webinars/${clientData.meetingID}/registrants`, 
-          {
-            headers: { 
-              'Authorization': 'Bearer '+token,
-              'Content-Type': 'application/json'
-            },
-            body: jsonBody
-          },
-          function(error, response, body){
-            if (error) {reject(console.log("Issue posting to zoom: "+error));}
-            console.log("Secondary users response from zoom:\n "+body+"\n");
-            resolve(body); 
-            }
-          )
-        });
-      })}
-      
+      email: clientData.primaryUser.email[0],
+      first_name: clientData.primaryUser.email[0],
+      last_name: clientData.company,
+      org: clientData.company
+    });
   
+    var jsonBody = JSON.stringify(body);
+      var options = {
+        method: 'POST',
+        url: `https://api.zoom.us/v2/webinars/${clientData.meetingID}/registrants`,
+        headers:{
+          'cache-control': 'no-cache',
+          Authorization: token,
+          'Content-Type': 'application/json' },
+          body: jsonBody };
+      try {
+        var zoomResponse = await request(options);
+        return zoomResponse;
+      } catch (err) {
+        console.log(err)
+        throw new Error("Error posting secondary registrant to Zoom: " + err);}
+      })
+    }
   else return ("No secondary users registered.");
 }
+
+
+exports.processData = async (req, res) => {
+  try {
+    var input = req.body
+
+    //parse column data into JSON
+    const companyInfo = parseWebhookFromWelcomeCallForm(input);
+
+    // get whole webinar list from Zoom
+    const webinarList = await getRecentWebinars(); 
+
+    // using the date of the welcome call and the list of all webinars, 
+    //  assign proper meeting as the first meeting of the day next week
+    companyInfo.meetingID = await matchCorrectWebinar(companyInfo, webinarList);
+
+    // push info to Zoom to register new participants and return response
+    const registrationStatus = await registerContacts(companyInfo);
+
+    // format response to GCF
+    var returnString = "";
+      registrationStatus.map((e)=>{
+        returnString+=JSON.stringify(e);
+      });
+  
+      var message = req.query.message || req.body.message || `${returnString}`;
+
+    // send response to GCF
+    res.status(200).send(message);
+  }catch (error) {
+    console.log("Oh no! There was an error! Error: "+ error);
+    var message = req.query.message || req.body.message || `There was an error: ${error}`;
+    res.status(200).send(message);
+  }
+}
+
+//processData(testData);
+
+
+//processData(payload).then(function(values){console.log("Final output: " + values)})
+// .then((values) => {
+//   console.log("These are the final values: " + values);
+// })
