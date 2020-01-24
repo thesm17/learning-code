@@ -1,12 +1,12 @@
 {
-  "name": "zoominvites",
+  "name": "manageCerts",
   "version": "1.0.0",
-  "description": "",
-  "main": "GroupDemoRegistrationCF.js",
+  "description": "Manages Zoom to ShSp api calls",
+  "main": "manageCerts.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Smitty Penman",
   "license": "ISC",
   "dependencies": {
     "@google-cloud/storage": "^2.3.4",
@@ -16,5 +16,14 @@
     "jsonwebtoken": "^8.4.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesm17/ZoomRegistration.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thesm17/ZoomRegistration/issues"
+  },
+  "homepage": "https://github.com/thesm17/ZoomRegistration#readme"
 }
